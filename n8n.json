@@ -1,0 +1,322 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7,
+              "triggerAtMinute": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -496,
+        224
+      ],
+      "id": "61752eaf-4264-4e9e-ba85-101660c00fd5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "tomasz.jader@gmail.com"
+        },
+        "timeMax": "={{ $now.set({ hour: 23, minute: 9, second: 0, millisecond: 0 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        224
+      ],
+      "id": "9ea296ac-5fab-47a7-9b80-3a21ebbf43d5",
+      "name": "Get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "Kif8MuBn1SYbgina",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "cityName": "Warsow",
+        "language": "pl"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        528,
+        224
+      ],
+      "id": "dd94d8d5-c445-4e0d-b6de-1e9aa277f6c2",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "fbmvVvO43FqUbUSn",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "task": "MDg4OTMyNzEwMzg5ODkyMDkwNzg6MDow",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasks",
+      "typeVersion": 1,
+      "position": [
+        752,
+        224
+      ],
+      "id": "23553261-c326-4366-a024-2477a518fc82",
+      "name": "Get many tasks",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "Ngrp8arRbsLNDafI",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=opowiedz żart typu suchar"
+            },
+            {
+              "content": "dwaj"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        224
+      ],
+      "id": "fcaaa942-3f34-4d2c-8bf1-15ac7c434840",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8z6fF0njNGN7axS5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Get row(s)').item.json.id_chat }}",
+        "text": "={{ $json.raport }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1648,
+        224
+      ],
+      "id": "a98013a7-5fc1-4c49-ac0e-c2827a460b94",
+      "name": "Send a text message",
+      "webhookId": "07d38e4a-81d9-4157-9c6a-6db008b8f704",
+      "credentials": {
+        "telegramApi": {
+          "id": "gFqrqvMMuykchDgs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "r5iHFZ9vD734mOPl",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "/projects/bObCSV5kAX5lUQ0D/datatables/r5iHFZ9vD734mOPl"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        224
+      ],
+      "id": "cfe8c613-200b-4ce1-8d9c-2782413b2b25",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Dane wejściowe ---\nconst weatherData = $('OpenWeatherMap').first().json ?? {};\n\n// Żart AI\nconst aiJoke = $('Message a model').first().json?.output?.[0]?.content?.[0]?.text ?? \"Brak żartu\";\n\n// Wydarzenia z kalendarza\nconst events = $('Code in JavaScript2').first().json?.eventy ?? [];\n\n// Zadania z Google Tasks\nconst tasksInput = $('Code in JavaScript1').first().json ?? {};\nconst tasks = tasksInput.tasks ?? [];\n\n// --- Formatowanie wydarzeń ---\n// --- Formatowanie wydarzeń (tylko godziny) ---\nconst formattedEvents = events.length\n  ? events.map(e => {\n      const startHour = e.start?.dateTime ? new Date(e.start.dateTime).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }) : '-';\n      const endHour = e.end?.dateTime ? new Date(e.end.dateTime).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }) : '-';\n      return `• ${e.summary} (${startHour} - ${endHour})`;\n    }).join(\"\\n\")\n  : \"Brak wydarzeń w kalendarzu na dziś.\";\n\n\n// --- Formatowanie zadań ---\nconst formattedTasks = tasks.length\n  ? tasks.map(t => `• ${t.title}`).join(\"\\n\")\n  : \"Brak zadań.\";\n\n// --- Pogoda (bezpieczny dostęp do właściwości) ---\nconst weatherInfo = weatherData?.weather?.[0] ?? {};\nconst main = weatherData?.main ?? {};\nconst wind = weatherData?.wind ?? {};\nconst clouds = weatherData?.clouds ?? {};\nconst visibility = weatherData?.visibility ?? 0;\n\n// --- Finalny raport ---\n// --- Finalny raport ---\nconst raport = `\n🗓️ *Twój poranny automatyczny raport*\n\nPogoda dla miasta ${weatherData.name ?? \"nieznanego\"}:\n\n🌤 Opis: ${weatherInfo.description ?? \"-\"}\n🌡 Temperatura: ${main.temp ?? \"-\"}°C\n🥶 Odczuwalna: ${main.feels_like ?? \"-\"}°C\n📉 Minimalna: ${main.temp_min ?? \"-\"}°C\n📈 Maksymalna: ${main.temp_max ?? \"-\"}°C\n\n💧 Wilgotność: ${main.humidity ?? \"-\"}%\n🧭 Wiatr: ${wind.speed ?? \"-\"} m/s (kierunek ${wind.deg ?? \"-\" }°)\n☁️ Zachmurzenie: ${clouds.all ?? \"-\"}%\n🌫 Widoczność: ${visibility} m\n\nCiśnienie: ${main.pressure ?? \"-\"} hPa\n\n📅 **Kalendarz na dziś:**  \n${formattedEvents}\n\n📝 **Twoje zadania (Google Tasks):**  \n${formattedTasks}\n\n🤣 **Żart dnia:**  \n${aiJoke}\n`.trim();\n\n\n// --- Zwracanie wyniku ---\nreturn [{ json: { raport } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        224
+      ],
+      "id": "2ffb2912-413e-49a1-9614-c2356df8354b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Zbierz wszystkie itemy jako jedną listę:\nconst tasks = items.map(item => item.json);\n\n// Teraz tasks = [ {...}, {...}, {...} ]\n\nreturn [\n  {\n    json: { tasks }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        224
+      ],
+      "id": "e28ca4c6-fe05-46ec-9df8-97d8111b68c5",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Zbierz wszystkie itemy jako jedną listę:\nconst eventy = items.map(item => item.json);\n\n// Teraz tasks = [ {...}, {...}, {...} ]\n\nreturn [\n  {\n    json: { eventy }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        224
+      ],
+      "id": "7aa3a1f0-75cf-402d-bc2b-5762396c0526",
+      "name": "Code in JavaScript2"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Get many tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many tasks": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fc1ba0345969f7228871df9e64b3b47e4f43ee33b19ce42717b44162e39dba6e"
+  }
+}
