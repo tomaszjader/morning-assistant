@@ -28,7 +28,6 @@
           "mode": "list",
           "value": "tomasz.jader@gmail.com"
         },
-        "timeMin": "=2025-12-05T03:39:28.123+01:00",
         "timeMax": "={{ $now.set({ hour: 23, minute: 9, second: 0, millisecond: 0 }) }}",
         "options": {}
       },
@@ -50,7 +49,7 @@
     },
     {
       "parameters": {
-        "cityName": "Warsow",
+        "cityName": "Warsaw",
         "language": "pl"
       },
       "type": "n8n-nodes-base.openWeatherMap",
@@ -101,7 +100,7 @@
         "responses": {
           "values": [
             {
-              "content": "=opowiedz żart typu suchar"
+              "content": "napisz ciekawostkę o imperium rzymskim"
             },
             {
               "content": "dwaj"
